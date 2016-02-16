@@ -37,16 +37,23 @@
 	        $this->isConn = false;
 	    }
 
-	    public function query() {
+	    public function filter() {
+	    	$this->sql = trim(str_replace("\r", " ", $this->sql));
+	    }
+
+	    public function query( $mode = PDO::FETCH_OBJ ) {
 	    	
 	        try { 
 
-	            $stmt = $this->conn->prepare($this->sql); 
-	            $stmt->execute($this->params);
+	            $this->stmt = $this->conn->prepare($this->sql);
+	            $this->stmt->execute($this->params);
+	            
+	            return $this->stmt->fetchAll($mode);
 
-            } catch (PDOException $e) {
+	        } catch( PDOException $e ) {
+
 	            throw new Exception($e->getMessage());
-	        }           
+	        }            
 	    }
 
 	    public function read( $mode = PDO::FETCH_OBJ ) {

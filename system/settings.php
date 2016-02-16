@@ -5,6 +5,12 @@ header('Last Modified: '. gmdate('D, d M Y H:i:s') .' GMT');
 header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');  
 header('Pragma: no-cache');  
 header("Cache: no-cache");    
+
+header("Access-Control-Allow-Origin: *");
+/*header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");*/
+
 error_reporting(E_ALL ^ E_NOTICE);
 ini_set('display_errors','On');
 set_time_limit(0);
@@ -20,9 +26,9 @@ define('SYS_EXCEPTION_DIR', PROJECT_DIR . 'system'. DS .'exceptions'. DS);
 define('SYS_MODEL_DIR', PROJECT_DIR . 'system'. DS .'models'. DS);
 
 /** Diretorios da Aplicação **/
-define('CONTROLLER_DIR', PROJECT_DIR . 'app'. DS .'Controllers'. DS);
-define('VIEW_DIR', PROJECT_DIR . 'app'. DS .'Views'. DS);
-define('MODEL_DIR', PROJECT_DIR . 'app'. DS .'Models'. DS);
+define('CONTROLLER_DIR', PROJECT_DIR . 'app'. DS .'controllers'. DS);
+define('VIEW_DIR', PROJECT_DIR . 'app'. DS .'views'. DS);
+define('MODEL_DIR', PROJECT_DIR . 'app'. DS .'models'. DS);
 define('DAO_DIR', MODEL_DIR . 'dao'. DS);
 define('CONTENT_DIR', PROJECT_DIR . 'content'. DS);
 define('IMG_DIR', CONTENT_DIR . 'img'. DS);
@@ -53,8 +59,8 @@ define('AUTOLOAD',
 define("DB_HOST", "127.0.0.1");
 define("DB_USER", "root");
 define("DB_PASS", "");
-define("DB_DATABASE", "myFrameWork");
+define("DB_DATABASE", "webservice");
 
 /** Configurações Gerais **/
 define('TITLE', 'Sistema de Banners');
-define('PAGE_DEFAULT', 'Index');
+define('PAGE_DEFAULT', 'main');

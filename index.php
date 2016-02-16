@@ -6,7 +6,7 @@ require_once('system/controller.php');
 require_once('system/model.php');
 
 $autoloader = new autoLoader(unserialize(AUTOLOAD));
-$app = new controller();
+$app = new factory();
 
 try {
 
@@ -23,7 +23,6 @@ try {
 
 } catch (Exception $e) {
 		
-	$app->view('Exceptions/Exception', false);
-	$app->show(array('ERROR_MSG' => $e->getMessage()));
+	echo $e->getMessage();
 
 }

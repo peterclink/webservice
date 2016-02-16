@@ -34,16 +34,16 @@
             
             $this->_path = null;
 
-        	if ( file_exists( $path ) ) {
-        		$this->_path = $path;
-        		return true;        	
-        	}
+            echo $path;
+            if ( file_exists( $path ) ) {
+                $this->_path = $path;
+                return true;            
+            }
             
-        	return false;
+            return false;
         }
 
         public function includeClass() {
-
             if($this->_path <> null)
                 require_once $this->_path;
             else
@@ -51,7 +51,7 @@
         }
 
         public static function throwFileNotFoundException($className) {
-            throw new Exception("O arquivo com a classe <strong>$className</strong> não foi encontrado.");
+            throw new Exception("O arquivo com a classe <strong>$className</strong> não foi encontrado.<br>");
         }
 
 	}

@@ -6,11 +6,11 @@ class controller extends factory {
 	public $api_response_code;
 	public $response;
 
-	public function init() {
+	public function service( $response ) {
 
 		$this->response['code'] = 0;
 		$this->response['status'] = 404;
-		$this->response['data'] = NULL;
+		$this->response['data'] = $response;
 
 		$this->api_response_code = array(
 			0 => array('HTTP Response' => 400, 'Message' => 'Unknown Error'),
@@ -22,20 +22,20 @@ class controller extends factory {
 			6 => array('HTTP Response' => 400, 'Message' => 'Invalid Response Format')
 		);
 
-		$this->isAuthentication();
+		//$this->isAuthentication();
 
 
 		// Method A: Say Hello to the API
-		if( strcasecmp($_GET['method'],'hello') == 0){
+		/*if( strcasecmp($_GET['method'],'hello') == 0){
 			$this->response['code'] = 1;
 			$this->response['status'] = $this->api_response_code[ $this->response['code'] ]['HTTP Response'];
 			$this->response['data'] = 'Hello World';
 		}
-
+*/
 		// --- Step 4: Deliver Response
 
 		// Return Response to browser
-		$this->response($_GET['format'], $this->response);
+		$this->response('xml', $this->response);
 	}
 	
 	public function response( $format, $api_response ) {
@@ -58,7 +58,7 @@ class controller extends factory {
 			header('Content-Type: application/json; charset=utf-8');
 
 			// Format data into a JSON response
-			$json_response = json_encode($api_response);
+			$json_response = json_encode($api_response['data']);
 
 			// Deliver formatted data
 			echo $json_response;
@@ -72,7 +72,7 @@ class controller extends factory {
 			$xml_response = '<?xml version="1.0" encoding="UTF-8"?>'."\n".
 			'<response>'."\n".
 			"\t".'<code>'.$api_response['code'].'</code>'."\n".
-			"\t".'<data>'.$api_response['data'].'</data>'."\n".
+			"\t".'<data>'.json_encode($api_response['data']).'</data>'."\n".
 			'</response>';
 
 			// Deliver formatted data
