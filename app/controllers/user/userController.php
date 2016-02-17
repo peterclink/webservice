@@ -22,12 +22,19 @@ class userController extends controller {
 		$db->set('sql', 'select * from user');
 		$data = $db->read();
 		$db->close();
-		/*
 		$this->service($data);
-		*/
+	}
 
+	public function jwt() {
+		$jwt = new jwt();
 
-		echo json_encode($data);
+		echo $jwt->createToken();
+	}
+
+	public function validate() {
+		$jwt = new jwt();
+
+		echo $jwt->validate();
 	}
 
 }

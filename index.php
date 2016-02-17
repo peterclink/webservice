@@ -4,6 +4,7 @@ require_once('system/autoLoader.php');
 require_once('system/factory.php');
 require_once('system/controller.php');
 require_once('system/model.php');
+require_once('system/jwt.php');
 
 $autoloader = new autoLoader(unserialize(AUTOLOAD));
 $app = new factory();

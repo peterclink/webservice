@@ -9,7 +9,7 @@ class controller extends factory {
 	public function service( $response ) {
 
 		$this->response['code'] = 0;
-		$this->response['status'] = 404;
+		$this->response['status'] = 200;
 		$this->response['data'] = $response;
 
 		$this->api_response_code = array(
@@ -35,7 +35,7 @@ class controller extends factory {
 		// --- Step 4: Deliver Response
 
 		// Return Response to browser
-		$this->response('xml', $this->response);
+		$this->response('json', $this->response);
 	}
 	
 	public function response( $format, $api_response ) {
