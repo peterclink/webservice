@@ -89,6 +89,10 @@ class controller extends factory {
 		}
 	}
 
+	public function json($data) {
+		return print(json_encode($data));
+	}
+
 	public function isHttps() {
 
 		if( $this->https_required && $_SERVER['HTTPS'] != 'on' ) {

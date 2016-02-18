@@ -26,6 +26,8 @@ define('PROJECT_DIR', $_SERVER['DOCUMENT_ROOT'] . DS);
 define('SYS_HELPER_DIR', PROJECT_DIR . 'system'. DS . 'helpers'. DS);
 define('SYS_EXCEPTION_DIR', PROJECT_DIR . 'system'. DS .'exceptions'. DS);
 define('SYS_MODEL_DIR', PROJECT_DIR . 'system'. DS .'models'. DS);
+define('DATA_DIR', PROJECT_DIR . 'data'. DS );
+define('AUTH_KEY_DIR', PROJECT_DIR . 'data'. DS . 'key' . DS );
 
 /** Diretorios da Aplicação **/
 define('CONTROLLER_DIR', PROJECT_DIR . 'app'. DS .'controllers'. DS);

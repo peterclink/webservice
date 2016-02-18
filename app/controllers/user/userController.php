@@ -37,4 +37,10 @@ class userController extends controller {
 		echo $jwt->validate();
 	}
 
+	public function test() {
+		$jwt = new jwt();
+
+		echo $jwt->headers();
+	}
+
 }
