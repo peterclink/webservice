@@ -16,7 +16,7 @@ class authController extends controller {
 		if( $login == 'peterlink' && $password == '123456' ) {
 			
 			$jwt = new jwt();
-			$token = $jwt->createToken();
+			$token = $jwt->create();
 			
 			$this->credentials['auth'] = true;
 			$this->credentials['token'] = $token;
@@ -26,5 +26,12 @@ class authController extends controller {
 		}
 		
 		$this->json($this->credentials);
+	}
+
+	public function isAuthenticated() {
+
+		$jwt = new jwt();
+		$token = $jwt->validate();
+		$this->json($token);
 	}
 }

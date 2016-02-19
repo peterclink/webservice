@@ -14,7 +14,7 @@ class jwt {
 	public function jwt() {
 	}
 
-	public function createToken() {
+	public function create() {
 		$tokenId  = base64_encode(mcrypt_create_iv(32)); // WARN: If you want to be able to validate this it shouldn't be random (otherwise your validation will be naive)
 		$serverName = parse_url($_SERVER['HTTP_HOST'], PHP_URL_HOST); // Let's get just what needed (http://php.net/manual/en/function.parse-url.php)
 
@@ -49,20 +49,16 @@ class jwt {
 			$publicKey = new Key('file://' . AUTH_KEY_DIR . 'public.key');
 
 			if (!$token->verify(new Sha256(), $publicKey)) {
-			    $this->log('JwtTokenAuthenticate:__findUser: Someone has changed your token mate.');
-			    return $this->log();
+				throw new Exception('JwtTokenAuthenticate:__findUser: Someone has changed your token mate.');
 			}
 
 			if(empty($token)){ // SUGGEST: This is useless since if anything goes wrong during parsing an Exception will be raised
-			    //return json_decode(json_encode("Unable to parse token."), true);
-				$this->log('JwtTokenAuthenticate:_findUser: Unable to parse token.');
-			    return $this->log();
+			    throw new Exception('JwtTokenAuthenticate:_findUser: Unable to parse token.');
 			}
 
 			$uid = (string) $token->getClaim('username'); // WARN: That's what I was talking before (naive validation =P) 
 			if( !$uid ){
-				$this->log('JwtTokenAuthenticate:_findUser: Unable to find valid id.');
-			    return $this->log();
+				throw new Exception('JwtTokenAuthenticate:_findUser: Unable to find valid id.');
 			}
 
 			$serverName = parse_url($_SERVER['HTTP_HOST'], PHP_URL_HOST); // same thing here
@@ -78,17 +74,10 @@ class jwt {
 
 			$token->validate($validationData);
 
-			return json_encode(['result' => 1, 'message' => 'TOKEN VALIDADO ', 'TOKEN' => $_HEADERS['HTTP_AUTHORIZATION']]);
+			return ['success' => true];
 
-		} catch (Exception $exception) {
-			$this->log('A identidade do token foi alterada');
-		    return $this->log();
+		} catch (Exception $e) {
+			return ['success' => false, 'error' => $e->getMessage()];
 		}
-	}
-
-	public function log($log = false) {
-		if($log)
-			array_push($this->log, $log);
-		return json_encode([$this->log]);
 	}
 }
