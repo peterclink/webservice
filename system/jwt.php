@@ -14,7 +14,7 @@ class jwt {
 	public function jwt() {
 	}
 
-	public function create() {
+	public function create($login) {
 		$tokenId  = base64_encode(mcrypt_create_iv(32)); // WARN: If you want to be able to validate this it shouldn't be random (otherwise your validation will be naive)
 		$serverName = parse_url($_SERVER['HTTP_HOST'], PHP_URL_HOST); // Let's get just what needed (http://php.net/manual/en/function.parse-url.php)
 
@@ -27,9 +27,9 @@ class jwt {
 		->setAudience($serverName)
 		->setId($tokenId, true) // WARN: do you really need to replicate the id as a header? this will increase the token size
 		->setIssuedAt(time())
-		->setExpiration(time() + 3600)
+		->setExpiration(time() + 15)
 		->set('id', 15)
-        ->set('username', 'peterlink')
+        ->set('username', $login)
         ->set('role', 'admin')
 		->sign($signer,  $privateKey)
 		->getToken();
@@ -42,6 +42,7 @@ class jwt {
 
 		$_HEADERS = getallheaders();
 		$token = $_HEADERS['HTTP_AUTHORIZATION'];
+		//$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IkRVeUl3cnN1eCtyVUlXUktHSEF5ZVRqOW9FeVFtckZ0RFwvUSszcTg1MWdZPSJ9.eyJpc3MiOiJ3ZWJzZXJ2aWNlLmxvY2FsaG9zdCIsImF1ZCI6IndlYnNlcnZpY2UubG9jYWxob3N0IiwianRpIjoiRFV5SXdyc3V4K3JVSVdSS0dIQXllVGo5b0V5UW1yRnREXC9RKzNxODUxZ1k9IiwiaWF0IjoxNDU1OTEwNTMyLCJleHAiOjE0NTU5MTA1OTIsImlkIjoxNSwidXNlcm5hbWUiOiJwZXRlcmxpbmsiLCJyb2xlIjoiYWRtaW4ifQ.r-NhT1la8pcPHSvpdgy2u0GLeaAtvcqDo7UFicGfkvKWOSgIkYhnxb3NkQ8c_vLiwFFT7u-pTA6W4Q62SXzZvGFID44BkMLQAN1xr5wS28OJN1lACqhfjIP9PDbqdEPuaoGs9RqpwjFpHqfaX3Q1uVprNAKiBv53PnXQgVHatY70U4Yh6lboBdUlWBlHB_VCcuTgTfvkICSG310km7pHVAt3ENaCN1y7k5PRv3QWM1QnwBrAyy7lC8ELX8z8KYg7XDAnJsxfhXZcZ6CtMB5CoOyt6ekP41HAsiXeZTrebYNnLTEoX54bNpE6bPmGjbYPzKpFfg2Iu9Ub0cDqVUkTrg";
 
 		try {
 
@@ -61,6 +62,11 @@ class jwt {
 				throw new Exception('JwtTokenAuthenticate:_findUser: Unable to find valid id.');
 			}
 
+			$time = $token->getClaim('exp'); // WARN: That's what I was talking before (naive validation =P) 
+			if( time() > $time ){
+				throw new Exception('JwtTokenAuthenticate:_findUser: token expire.');
+			}
+
 			$serverName = parse_url($_SERVER['HTTP_HOST'], PHP_URL_HOST); // same thing here
 
 			$validationData = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
@@ -70,14 +76,14 @@ class jwt {
 			//$validationData->setId(15); // WARN (the last about this LOL): here you're validating if the Parser done his job
 			//$validationData->setSigner(strval(Configure::read('Security.cipherSeed'))); Signature verification and token validation are different things
 
-			$validationData->setCurrentTime(time()); // ERR: this shouldn't be called
+			//$validationData->setCurrentTime(time() + 16); // ERR: this shouldn't be called
 
 			$token->validate($validationData);
 
-			return ['success' => true];
+			return ['auth' => true, 'user'=>$time, 'ussaser'=>time()];
 
 		} catch (Exception $e) {
-			return ['success' => false, 'error' => $e->getMessage()];
+			return ['auth' => false, 'error' => $e->getMessage()];
 		}
 	}
 }

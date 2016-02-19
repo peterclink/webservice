@@ -13,10 +13,10 @@ class authController extends controller {
 		$login = $_POST['login'];
 		$password = $_POST['password'];
 
-		if( $login == 'peterlink' && $password == '123456' ) {
+		if( ( $login == 'peterlink' || $login == 'peter' ) && $password == '123456' ) {
 			
 			$jwt = new jwt();
-			$token = $jwt->create();
+			$token = $jwt->create($login);
 			
 			$this->credentials['auth'] = true;
 			$this->credentials['token'] = $token;
