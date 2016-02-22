@@ -27,7 +27,7 @@ class jwt {
 		->setAudience($serverName)
 		->setId($tokenId, true) // WARN: do you really need to replicate the id as a header? this will increase the token size
 		->setIssuedAt(time())
-		->setExpiration(time() + 15)
+		->setExpiration(time() + 3600)
 		->set('id', 15)
         ->set('username', $login)
         ->set('role', 'admin')
@@ -80,7 +80,15 @@ class jwt {
 
 			$token->validate($validationData);
 
-			return ['auth' => true, 'user'=>$time, 'ussaser'=>time()];
+			return [
+				'auth' => true, 
+				'duration'=> $time, 
+				'expire'=> date('H:i:s', $time),
+				'user'=> [
+					'login' => $uid,
+					'name' => 'Peter Link'
+				], 
+			];
 
 		} catch (Exception $e) {
 			return ['auth' => false, 'error' => $e->getMessage()];
