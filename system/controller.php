@@ -1,5 +1,5 @@
 <?php
-class controller extends factory {
+class controller  {
 
 	public $https_required = FALSE;
 	public $authentication_required = FALSE;

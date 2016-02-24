@@ -34,7 +34,6 @@
             
             $this->_path = null;
 
-            echo $path;
             if ( file_exists( $path ) ) {
                 $this->_path = $path;
                 return true;            

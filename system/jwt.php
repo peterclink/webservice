@@ -40,10 +40,8 @@ class jwt {
 
 	public function validate() {
 
-		$_HEADERS = getallheaders();
-		$token = $_HEADERS['HTTP_AUTHORIZATION'];
+		$token = $_SERVER['HTTP_AUTHORIZATION'];
 		//$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IkRVeUl3cnN1eCtyVUlXUktHSEF5ZVRqOW9FeVFtckZ0RFwvUSszcTg1MWdZPSJ9.eyJpc3MiOiJ3ZWJzZXJ2aWNlLmxvY2FsaG9zdCIsImF1ZCI6IndlYnNlcnZpY2UubG9jYWxob3N0IiwianRpIjoiRFV5SXdyc3V4K3JVSVdSS0dIQXllVGo5b0V5UW1yRnREXC9RKzNxODUxZ1k9IiwiaWF0IjoxNDU1OTEwNTMyLCJleHAiOjE0NTU5MTA1OTIsImlkIjoxNSwidXNlcm5hbWUiOiJwZXRlcmxpbmsiLCJyb2xlIjoiYWRtaW4ifQ.r-NhT1la8pcPHSvpdgy2u0GLeaAtvcqDo7UFicGfkvKWOSgIkYhnxb3NkQ8c_vLiwFFT7u-pTA6W4Q62SXzZvGFID44BkMLQAN1xr5wS28OJN1lACqhfjIP9PDbqdEPuaoGs9RqpwjFpHqfaX3Q1uVprNAKiBv53PnXQgVHatY70U4Yh6lboBdUlWBlHB_VCcuTgTfvkICSG310km7pHVAt3ENaCN1y7k5PRv3QWM1QnwBrAyy7lC8ELX8z8KYg7XDAnJsxfhXZcZ6CtMB5CoOyt6ekP41HAsiXeZTrebYNnLTEoX54bNpE6bPmGjbYPzKpFfg2Iu9Ub0cDqVUkTrg";
-
 		try {
 
 			$token = (new Parser())->parse((string) $token);

@@ -12,7 +12,8 @@
 	    public $sql;
 	    protected $stmt;
 
-		public function __construct() {
+		public function __construct($table = false) {
+			$this->_table = $table;
 		}
 
 		public function open() {       
@@ -37,6 +38,52 @@
 	        $this->isConn = false;
 	    }
 
+	    public function get() {
+
+	    	$this->_sql = 'SELECT * FROM ' . $this->_table . $this->_where;
+
+	    	try { 
+
+	            $this->stmt = $this->conn->prepare($this->_sql);
+	            $this->stmt->execute($this->_params);
+	            
+	            return $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+	        } catch( PDOException $e ) {
+
+	            throw new Exception($e->getMessage());
+	        }
+	    }
+
+	    public function where($dados) {
+ 
+			$fields = count($dados);
+			$i = 0;
+
+			$this->_where = ' WHERE ';
+
+			foreach ($dados as $key => $value) {
+				if ( $fields == 1) {
+					$this->_where .= $key . ' = ' . $value;
+					break;
+				} else {
+					if ( $i+1 == $fields) {
+						$this->_where .= $key . ' = ' . $value;
+					} else {
+						$this->_where .= $key . ' = ' . $value . ' AND ';
+					}
+				}
+				$i++;
+			}
+	    }
+
+	    public function params($params) {
+			$this->_params = $params;
+	    }
+
+
+	    /******************************************************************************/
+
 	    public function filter() {
 	    	$this->sql = trim(str_replace("\r", " ", $this->sql));
 	    }
@@ -59,7 +106,7 @@
 	    public function read( $mode = PDO::FETCH_OBJ ) {
 
 	    	if(empty($this->sql)) {
-	    		$this->sql = "Select * from " .$this->_table;
+	    		$this->sql = "Select * from " . $this->_table;
 	    	}
 
 	        try { 

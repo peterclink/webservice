@@ -3,44 +3,28 @@ class userController extends controller {
 
 	public function index() {
 		$db = new model();
-		$db->open();
+		/*$db->open();
 		$db->set('sql', 'select * from user');
 		$data = $db->read();
 		var_dump($data);
 		$db->close();
-		echo "home";
+		echo "home";*/
 	}
 
-	public function campanha() {
-		echo 'indexController<br>';
-		echo $this->getParam('input');
+	protected function get() {
+		echo 'metodo get';
 	}
 
-	public function get() {
-		$db = new model();
-		$db->open();
-		$db->set('sql', 'select * from user');
-		$data = $db->read();
-		$db->close();
-		$this->service($data);
+	protected function post() {
+		echo 'metodo post';
 	}
 
-	public function jwt() {
-		$jwt = new jwt();
-
-		echo $jwt->createToken();
+	protected function put() {
+		echo 'metodo put';
 	}
 
-	public function validate() {
-		$jwt = new jwt();
-
-		echo $jwt->validate();
-	}
-
-	public function test() {
-		$jwt = new jwt();
-
-		echo $jwt->headers();
+	protected function delete() {
+		echo 'metodo delete';
 	}
 
 }
