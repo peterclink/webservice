@@ -7,7 +7,6 @@ class controller  {
 	public $response;
 
 	public function service( $response ) {
-
 		$this->response['code'] = 0;
 		$this->response['status'] = 200;
 		$this->response['data'] = $response;

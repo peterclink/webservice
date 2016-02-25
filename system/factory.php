@@ -10,40 +10,54 @@ class factory {
 	private $_argument;
 	private $_routes;
 	private $_controllerPath;
+	private $_instance;
+	private $_error;
+	private $_errorCode;
 
-	private $_explode;
-	private $_params;
-	private $_language;
+	public $normalize;
+	public $request;
 
-	public function __construct($routes) {
-		//$this->setUrl();
-		//$this->setExplode();
-		//$this->setParams();
-		//$this->log();
-		//$this->setController();
-		//$this->setAction();
+	public function init($routes) {
+
 		$this->request();
 		$this->routes($routes);
+
+		if($this->_errorCode > 0) {
+			throw new Exception_404($this->_error);
+		} else {
+			$app = $this->_instance;
+			$action = $this->_action;
+
+			$app->normalize = $this->normalize;
+			$app->request = $this->request;
+
+			if(!$this->normalize->_is_null($this->_argument)) {
+				$app->$action($this->_argument);
+			} else {
+				$app->$action();
+			}
+		}
 	}
 
 	protected function request() {
-		$this->_url = $_GET['url'] = (isset($_GET['url'])) ? $_GET['url'] : PAGE_DEFAULT;
-		$this->_request = strtolower($_SERVER['REQUEST_METHOD']);
+		$url = $this->request->get('url');
+		$this->_url = ($this->normalize->_isset($url)) ? $url : PAGE_DEFAULT;
+		$this->_request = $this->normalize->_strtolower($this->request->server('REQUEST_METHOD'));
 	}
 
 	protected function routes($routes) {
 		
 		$this->_routes = $routes;
 
-		if (array_key_exists($this->_url, $this->_routes)) { 
+		if ($this->normalize->_array_key_exists($this->_url, $this->_routes)) { 
 			
-			if( empty($this->_routes[$this->_url]['module']) ) {
+			if($this->normalize->_empty($this->_routes[$this->_url]['module'])) {
 				$this->_routes[$this->_url]['module'] = $this->_routes[$this->_url]['controller'];
 			}
 
 		    $this->setModule($this->_routes[$this->_url]['module']);
 			$this->setController($this->_routes[$this->_url]['controller']);
-			$this->setAction($this->_routes[$this->_url]['action'], false);
+			$this->setAction($this->_routes[$this->_url]['action']);
 
 		} else {
 			$this->parameters();
@@ -52,57 +66,45 @@ class factory {
 
 	protected function parameters() {
 		
-		$this->_parameters = explode('/', $this->_url);
-		$parametersCount = count($this->_parameters);
+		$this->_parameters = $this->normalize->_explode('/', $this->_url);
+		$parametersCount = $this->normalize->_count($this->_parameters);
 		
 		$this->setModule($this->_parameters[0]);
 
 		if($parametersCount == 1) {
 			//Módulo
-
 			$this->setController($this->_parameters[0]);
 			$this->setAction();
 
-		} else if($parametersCount >= 2) {
+		} else if($parametersCount > 1) {
 			//Controller || Action || Parameters
+			if($this->setController($this->_parameters[1])) {
 
-			if($this->isController($this->_parameters[1])) {
-
-				$this->setController($this->_parameters[1]);
-				$this->setAction();
-
-				if($parametersCount >= 3) {
-
-					$controller = $this->requireController();
-
-					if($this->isAction($controller, $this->_parameters[2])) {
-						$this->setAction($this->_parameters[2]);
-					} else {
+				if($parametersCount > 2) {
+					if(!$this->setAction($this->_parameters[2])) {
 						$this->setArgument($this->_parameters[2]);
-					}
+					} 
 
 					if($parametersCount == 4) {
 						$this->setArgument($this->_parameters[3]);
+					} else {
+						$this->setAction();
 					}
-
+				} else {
+					$this->setAction();
 				}
 
 			} else {
 
 				$this->setController($this->_parameters[0]);
-				$controller = $this->requireController();
 
-				if($this->isAction($controller, $this->_parameters[1])) {
-					$this->setAction($this->_parameters[1]);
-				} else {
+				if(!$this->setAction($this->_parameters[1])) {
 					$this->setAction();
 					$this->setArgument($this->_parameters[1]);
 				}
 
 				if($parametersCount == 3) {
-
 					$this->setArgument($this->_parameters[2]);
-
 				}
 			}
 
@@ -110,163 +112,68 @@ class factory {
 	}
 
 	private function setModule( $module = 'index' ) {
-		$this->_module = strtolower($module);
-		if(substr($this->_module, -1) == 's') {
-			$this->_module = substr($this->_module,0,-1);
+		$this->_module = $this->normalize->_strtolower($module);
+		if($this->normalize->_substr($this->_module, -1) == 's') {
+			$this->_module = $this->normalize->_substr($this->_module,0,-1);
 		}
-	}
-
-	private function setController( $controller = 'index' ) {
-		$this->_controller = strtolower($controller);
-	}
-
-	private function setAction( $action = 'index', $rest = true ) {
-
-		if(is_null($action)) {
-			$action = 'index';
-		}
-
-		if($rest) {
-			$action .= '_' . $this->_request;
-		}
-
-		$this->_action = strtolower($action);
 	}
 
 	private function setArgument( $argument = 'index' ) {
-		$this->_argument = strtolower($argument);
+		$this->_argument = $this->normalize->_strtolower($argument);
 	}
 
-	public function isController( $controller ) {
+	private function setController( $controller = 'index' ) {
+		$controller = $this->normalize->_strtolower($controller);
 
+		if($this->isController($controller)) {
+			$this->_controller = $controller;
+			$this->instanceController();
+			$this->setError(0);
+			return TRUE;
+		} else {
+			$this->setError(404,'Invalid Controller');
+			return FALSE;
+		}
+	}
+
+	public function isController($controller) {
 		$this->_controllerPath = CONTROLLER_DIR . $this->_module . DS . $controller . 'Controller.php';
-
-		return (file_exists($this->_controllerPath)) ? true : false;
+		return ($this->normalize->_file_exists($this->_controllerPath)) ? TRUE : FALSE;
 	}
 
-	public function isAction( $controller, $action ) {
-		return (method_exists($controller, $action. '_' . $this->_request)) ? true : false;
+	private function instanceController() {
+		$this->normalize->_require($this->_controllerPath);
+		$controller = $this->normalize->_end($this->normalize->_explode('/',$this->_controller)).'Controller';
+
+		$this->_instance = new $controller();
 	}
 
-	public function requireController() {
-		
-		$controller_path = CONTROLLER_DIR . $this->_module . DS . $this->_controller . 'Controller.php';
+	private function setAction($action = 'index') {
 
-		if ( !file_exists($controller_path) ) {
-			throw new Exception_404($this->_controller);
+		if($this->normalize->_is_null($action)) {
+			$action = 'index';
 		}
 
-		require_once($controller_path);
+		$action = $this->normalize->_strtolower($action);
 
-		$controller = @end(explode('/',$this->_controller)).'Controller';
-
-		return new $controller();
-	}
-
-	public function run() {
-
-		$app = $this->requireController();
-
-		if( !method_exists($app, $this->_action) )
-			throw new Exception_404($this->_action);
-
-		$action = $this->_action;
-
-		if(!is_null($this->_argument)) {
-			$app->$action($this->_argument);
+		if($this->isAction($action)) {
+			$this->_action = $action;
+		} else if($this->isAction($action . '_' . $this->_request)) {
+			$this->_action = $action . '_' . $this->_request;
 		} else {
-			$app->$action();
+			$this->setError(404,'Invalid Action');
+			return FALSE;
 		}
-		
+		$this->setError(0);
+		return TRUE;
 	}
 
-
-	/*
-	protected function setUrl() {
-		$this->_url = $_GET['url'] = (isset($_GET['url'])) ? $_GET['url'] : PAGE_DEFAULT;
+	private function isAction($action) {
+		return ($this->normalize->_method_exists($this->_instance, $action)) ? TRUE : FALSE;
 	}
 
-	protected function getUrl() {
-		return $this->_url;
+	public function setError($code, $error = 'Success') {
+		$this->_errorCode = $code;
+		$this->_error = $error;
 	}
-
-	protected function setExplode() {
-		
-		$this->_explode = explode('/', $this->_url);
-		$modules = (count($this->_explode) > 3) ? 3 : count($this->_explode);
-
-		switch ($modules) {
-			case 1:
-				$this->setModule($this->_explode[0]);
-				$this->setController($this->_explode[0]);
-				$this->setAction();
-				break;
-			case 2:
-				$this->setModule($this->_explode[0]);
-				$this->setController($this->_explode[0]);
-				$this->setAction($this->_explode[1]);
-				break;
-			case 3:
-				$this->setModule($this->_explode[0]);
-				$this->setController($this->_explode[1]);
-				$this->setAction($this->_explode[2]);
-				break;
-			default:
-				$this->setModule($this->_explode[0]);
-				$this->setController($this->_explode[0]);
-				$this->setAction();
-				break;
-		}
-	}
-
-	private function setModule( $module = 'index' ) {
-		$this->_module = strtolower($module);
-	}
-
-	
-
-	
-
-	private function setParams() {
-
-		$params = $this->_explode;
-
-		unset($params[0],$params[1],$params[2]);
-
-		if (empty(end($params))) array_pop($params);
-
-		$paramsCount = count($params);
-
-		if ( $paramsCount > 1 ) {
-			$i = 0;
-			foreach ( $params as $val ) {
-				if ( $i % 2 == 0 )
-					$index[] = $val;
-				else
-					$value[] = $val;						
-
-				$i++;
-			}
-		} else if ( $paramsCount == 1 ) {
-			foreach ( $params as $val ) {
-				$index[] = $this->_action;
-				$value[] = $val;
-			}
-		} else {
-			$index = array();
-			$value = array();
-		}
-
-		if( count($index) == count($value) && !empty($index) && !empty($value) )
-			$this->_params = array_combine($index, $value);
-		else
-			$this->_params = array();
-	}
-
-	public function getParam( $name = false ) {
-		return ($name) ? $this->_params[$name] : $this->_params;
-	}
-	*/
-	
-
 }

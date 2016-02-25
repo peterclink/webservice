@@ -2,10 +2,12 @@
 // https://github.com/lcobucci/jwt
 define('SERVER_URL', 'http://webservice.localhost:8090');
 
-function http($url, $data = [], $headers = []) {
+function http($url, $method, $data = [], $headers = []) {
+	$url = SERVER_URL . $url;
+
 	$options = [
 		'http' => [
-			'method'  => 'put',
+			'method'  => $method,
 			'header'  => array_merge(['Content-type: application/x-www-form-urlencoded'], $headers),
 			'content' => http_build_query($data),
 		],
@@ -16,7 +18,11 @@ function http($url, $data = [], $headers = []) {
 	return file_get_contents($url, false, $context);
 }
 
+$response = http('/auth', 'post', ['login' => 'peterlink', 'password' => '123456']);
 
-$url = SERVER_URL . '/auth';
-echo $response = http($url, ['username' => 'admin', 'password' => 'p4ssw0rd']);
+echo $response;
+
+/*echo $response = http($url, ['username' => 'admin', 'password' => 'p4ssw0rd'], array(
+	'AUTHORIZATION: Bearer '
+));*/
 //$response = json_decode($response);

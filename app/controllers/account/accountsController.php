@@ -11,6 +11,7 @@ class accountsController extends controller {
 		echo "home";*/
 
 		echo 'accountsController<br>';
+		//parent::__construct();
 	}
 
 	public function index_get($id = false) {

@@ -4,15 +4,27 @@ require_once('system/autoLoader.php');
 require_once('system/factory.php');
 require_once('system/controller.php');
 require_once('system/model.php');
-require_once('system/jwt.php');
+require_once('system/authentication.php');
+require_once('system/normalize.php');
+require_once('system/request.php');
 require_once('app/config/routes.php');
 
 $autoloader = new autoLoader(unserialize(AUTOLOAD));
-$app = new factory($routes);
+$app = new factory();
+$auth = new authentication();
+
+$normalize = new normalize();
+$request = new request();
 
 try {
 
-	$app->run();
+	$auth->normalize = $normalize;
+	$auth->request = $request;
+	$auth->init($routesPublic);
+
+	$app->normalize = $normalize;
+	$app->request = $request;
+	$app->init($routes);
 
 } catch ( Exception_404 $e ) {
 

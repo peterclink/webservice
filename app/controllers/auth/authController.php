@@ -9,13 +9,12 @@ class authController extends controller {
 	}
 
 	public function index() {
-
 		$login = $_POST['login'];
 		$password = $_POST['password'];
 
 		if( ( $login == 'peterlink' || $login == 'peter' ) && $password == '123456' ) {
 			
-			$jwt = new jwt();
+			$jwt = new authentication();
 			$token = $jwt->create($login);
 			
 			$this->credentials['auth'] = true;
@@ -30,7 +29,7 @@ class authController extends controller {
 
 	public function isAuthenticated() {
 
-		$jwt = new jwt();
+		$jwt = new authentication();
 		$token = $jwt->validate();
 		$this->json($token);
 	}
