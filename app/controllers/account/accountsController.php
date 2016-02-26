@@ -1,21 +1,7 @@
 <?php
 class accountsController extends controller {
 
-	public function accountsController() {
-		$db = new model();
-		/*$db->open();
-		$db->set('sql', 'select * from user');
-		$data = $db->read();
-		var_dump($data);
-		$db->close();
-		echo "home";*/
-
-		echo 'accountsController<br>';
-		//parent::__construct();
-	}
-
 	public function index_get($id = false) {
-		echo 'action index<Br>';
 		$model = new accountModel();
 		$dados = ($id) ? $model->getWhere($id) : $model->get(); 
 		$this->json($dados);

@@ -1,40 +1,87 @@
 <?php
 class controller  {
 
-	public $https_required = FALSE;
-	public $authentication_required = FALSE;
-	public $api_response_code;
-	public $response;
+	protected $responseCode;
+	protected $response;
 
-	public function service( $response ) {
-		$this->response['code'] = 0;
-		$this->response['status'] = 200;
-		$this->response['data'] = $response;
+	protected function json($data) {
+		header('Content-Type: application/json; charset=utf-8');
 
-		$this->api_response_code = array(
-			0 => array('HTTP Response' => 400, 'Message' => 'Unknown Error'),
-			1 => array('HTTP Response' => 200, 'Message' => 'Success'),
-			2 => array('HTTP Response' => 403, 'Message' => 'HTTPS Required'),
-			3 => array('HTTP Response' => 401, 'Message' => 'Authentication Required'),
-			4 => array('HTTP Response' => 401, 'Message' => 'Authentication Failed'),
-			5 => array('HTTP Response' => 404, 'Message' => 'Invalid Request'),
-			6 => array('HTTP Response' => 400, 'Message' => 'Invalid Response Format')
+		try {
+
+			$this->responseValidation($data);
+			return print(json_encode($data));
+
+		} catch (Exception $e) {
+			echo $e->getMessage();
+		}
+	}
+
+	protected function responseValidation($data) {
+		if(isset($data) && !empty($data) && count($data) > 0) {
+			$this->responseHeader(200);
+		} else {
+			$this->responseHeader(400);
+			throw new Exception('Nenhum dado encontrado');
+		}
+	}
+
+	protected function responseHeader($status) {
+		$this->responseCode = array(
+		    // Informational 1xx
+		    100 => 'Continue',
+		    101 => 'Switching Protocols',
+
+		    // Success 2xx
+		    200 => 'OK',
+		    201 => 'Created',
+		    202 => 'Accepted',
+		    203 => 'Non-Authoritative Information',
+		    204 => 'No Content',
+		    205 => 'Reset Content',
+		    206 => 'Partial Content',
+
+		    // Redirection 3xx
+		    300 => 'Multiple Choices',
+		    301 => 'Moved Permanently',
+		    302 => 'Found',  // 1.1
+		    303 => 'See Other',
+		    304 => 'Not Modified',
+		    305 => 'Use Proxy',
+		    // 306 is deprecated but reserved
+		    307 => 'Temporary Redirect',
+
+		    // Client Error 4xx
+		    400 => 'Bad Request',
+		    401 => 'Unauthorized',
+		    402 => 'Payment Required',
+		    403 => 'Forbidden',
+		    404 => 'Not Found',
+		    405 => 'Method Not Allowed',
+		    406 => 'Not Acceptable',
+		    407 => 'Proxy Authentication Required',
+		    408 => 'Request Timeout',
+		    409 => 'Conflict',
+		    410 => 'Gone',
+		    411 => 'Length Required',
+		    412 => 'Precondition Failed',
+		    413 => 'Request Entity Too Large',
+		    414 => 'Request-URI Too Long',
+		    415 => 'Unsupported Media Type',
+		    416 => 'Requested Range Not Satisfiable',
+		    417 => 'Expectation Failed',
+
+		    // Server Error 5xx
+		    500 => 'Internal Server Error',
+		    501 => 'Not Implemented',
+		    502 => 'Bad Gateway',
+		    503 => 'Service Unavailable',
+		    504 => 'Gateway Timeout',
+		    505 => 'HTTP Version Not Supported',
+		    509 => 'Bandwidth Limit Exceeded'
 		);
 
-		//$this->isAuthentication();
-
-
-		// Method A: Say Hello to the API
-		/*if( strcasecmp($_GET['method'],'hello') == 0){
-			$this->response['code'] = 1;
-			$this->response['status'] = $this->api_response_code[ $this->response['code'] ]['HTTP Response'];
-			$this->response['data'] = 'Hello World';
-		}
-*/
-		// --- Step 4: Deliver Response
-
-		// Return Response to browser
-		$this->response('json', $this->response);
+		header('HTTP/1.1 '.$status.' '. $this->responseCode[$status]);
 	}
 	
 	public function response( $format, $api_response ) {
@@ -84,51 +131,6 @@ class controller  {
 
 			// Deliver formatted data
 			echo $api_response['data'];
-
-		}
-	}
-
-	public function json($data) {
-		return print(json_encode($data));
-	}
-
-	public function isHttps() {
-
-		if( $this->https_required && $_SERVER['HTTPS'] != 'on' ) {
-			$this->response['code'] = 2;
-			$this->response['status'] = $this->api_response_code[ $this->response['code'] ]['HTTP Response'];
-			$this->response['data'] = $this->api_response_code[ $this->response['code'] ]['Message'];
-
-			// Return Response to browser. This will exit the script.
-			$this->response($_GET['format'], $this->response);
-		}
-	}
-
-	public function isAuthentication() {
-		// Optionally require user authentication
-		if( $this->authentication_required ){
-
-			if( empty($_POST['username']) || empty($_POST['password']) ){
-				$this->response['code'] = 3;
-				$this->response['status'] = $this->api_response_code[ $this->response['code'] ]['HTTP Response'];
-				$this->response['data'] = $this->api_response_code[ $this->response['code'] ]['Message'];
-
-				// Return Response to browser
-				//$this->response($_GET['format'], $this->response);
-
-			}
-
-			// Return an error response if user fails authentication. This is a very simplistic example
-			// that should be modified for security in a production environment
-			elseif( $_POST['username'] != 'foo' && $_POST['password'] != 'bar' ){
-				$this->response['code'] = 4;
-				$this->response['status'] = $this->api_response_code[ $this->response['code'] ]['HTTP Response'];
-				$this->response['data'] = $this->api_response_code[ $this->response['code'] ]['Message'];
-
-				// Return Response to browser
-				//$this->response($_GET['format'], $this->response);
-
-			}
 
 		}
 	}
