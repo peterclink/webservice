@@ -7,23 +7,16 @@ class accountsController extends controller {
 		$this->json($dados);
 	}
 
-	public function list_get($id = false) {
-		echo 'action list<Br>';
-		$model = new accountModel();
-		$dados = ($id) ? $model->getWhere($id) : $model->get(); 
-		$this->json($dados);
-	}
+	public function index_post() {
+		
+		$data['username'] = $this->request->post('username');
+		$data['password'] = $this->request->post('password');
+		$data['email'] = $this->request->post('email');
 
-	protected function post() {
-		echo 'metodo post';
-	}
+		$this->model = new accountModel();
 
-	protected function put() {
-		echo 'metodo put';
-	}
+		$this->model->sets($data);
 
-	protected function delete() {
-		echo 'metodo delete';
+		//$this->json(['Success']);
 	}
-
 }

@@ -12,39 +12,144 @@
 	    public $sql;
 	    protected $stmt;
 
-		public function __construct($table = false) {
-			$this->_table = $table;
-		}
+	    protected $_columns;
+	    protected $_where;
+	    protected $_orWhere;
+	    protected $_sql;
+	    protected $_params;
+
+	    public function __construct() {
+	    	$this->_params = [];
+	    }
 
 		public function open() {       
-
         	try { 
-
 		        $this->isConn = true;
 		        $this->conn = new PDO("mysql:host={$this->host};dbname={$this->db};charset=utf8", $this->user, $this->pass, $this->options); 
 		        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
 		        $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 		    } catch( PDOException $e ) { 
-
 		        $this->isConn = false;
 		        throw new Exception($e->getMessage());
 		    }
 		}
 
 		public function close() {
-
 	        $this->conn = null;
 	        $this->isConn = false;
 	    }
 
-	    public function get() {
+	    public function clear() {
+	    	$this->_where = null;
+	    	$this->_columns = null;
+	    	$this->_params = null;
+	    }
 
-	    	$this->_sql = 'SELECT * FROM ' . $this->_table . $this->_where;
+	    private function querySelect() {
+	    	$this->_sql = 'SELECT ' . $this->_columns . ' FROM ' . $this->table . $this->_where;
+	    }
 
-	    	try { 
+	    protected function columns($column) {
+	    	if(!$column) {
+	    		$this->_columns = implode(',', $this->columns);
+	    	} else {
+	    		$this->_columns = $column;
+	    	}
+	    }
 
+		/**
+		* Este metodo e para definicao das condicoes na clausula WHERE
+		*
+		* @uses $this->where(array('id' => 1,'user' => 'peter','email' => 'peter.link'));
+		*
+		* @param array $data campos => valores.
+		* @param mixed  $value The value of the database field.
+		* @param operator $operator Comparison operator. Default is =
+		* @param conditional $cond Condition of where statement (OR, AND)
+		*
+		* @return $this
+		*/
+	    protected function where($data, $conditional = false) {
+
+	    	$fields = count($data);
+			$i = 0;
+
+			$this->_where = ' WHERE ';
+
+			foreach ($data as $key => $value) {
+				$newKey = ':'.$key;
+				if ( $fields == 1) {
+					$this->_where .= $key . ' = ' . $newKey;
+					$this->_params[$newKey] = $value;
+					break;
+				} else {
+					$this->_params[$newKey] = $value;
+					if ( $i+1 == $fields) {
+						$this->_where .= $key . ' = ' . $newKey;
+					} else {
+						$cond = ($conditional) ? $conditional[$i] : 'AND';
+						$this->_where .= $key . ' = ' . $newKey . ' ' . $cond . ' ';
+					}
+				}
+				$i++;
+			}
+	    }
+
+	    /**
+		* Este metodo e para definicao das condicoes com operador OR na clausula WHERE
+		*
+		* @uses $this->OrWhere(array('id' => 1,'user' => 'peter','email' => 'peter.link'));
+		*
+		* @param array $data campos => valores.
+		* @param string  $conditional Opcional - Alterar o operador inicial default.
+		*
+		* @return $this
+		*/
+	    public function orWhere($data, $conditional = 'AND') {
+
+	    	$fields = count($data);
+			$i = 0;
+
+			if(is_null($this->_where)) {
+				$this->_where = ' WHERE ';
+			} else {
+				$this->_where .= " $conditional ";
+			}
+
+			if($fields < 2) {
+				throw new Exception('Para utlizar o metodo orWhere é necessário pelo menos 2 clausulas');
+			}
+
+			foreach ($data as $key => $value) {
+				$newKey = ':'.$key;
+				$this->_params[$newKey] = $value;
+				if($i == 0) {
+					$this->_where .= '(' . $key . ' = ' . $newKey . ' OR ';
+				} else if ( $i+1 == $fields) {
+					$this->_where .= $key . ' = ' . $newKey . ')';
+				} else {
+					$this->_where .= $key . ' = ' . $newKey . ' OR ';
+				}
+				$i++;
+			}
+
+			return $this;
+	    }
+
+	    public function get($column = false) {
+
+			echo $this->_where;
+	    	//$this->columns($column);
+	    	//$this->querySelect();
+
+	    	//echo $this->_where;
+
+	    	/*try { 
+
+            	print($this->_sql . '<br>');
 	            $this->stmt = $this->conn->prepare($this->_sql);
+            	print($this->stmt->queryString);
 	            $this->stmt->execute($this->_params);
 	            
 	            return $this->stmt->fetchAll(PDO::FETCH_OBJ);
@@ -52,35 +157,8 @@
 	        } catch( PDOException $e ) {
 
 	            throw new Exception($e->getMessage());
-	        }
+	        }*/
 	    }
-
-	    public function where($dados) {
- 
-			$fields = count($dados);
-			$i = 0;
-
-			$this->_where = ' WHERE ';
-
-			foreach ($dados as $key => $value) {
-				if ( $fields == 1) {
-					$this->_where .= $key . ' = ' . $value;
-					break;
-				} else {
-					if ( $i+1 == $fields) {
-						$this->_where .= $key . ' = ' . $value;
-					} else {
-						$this->_where .= $key . ' = ' . $value . ' AND ';
-					}
-				}
-				$i++;
-			}
-	    }
-
-	    public function params($params) {
-			$this->_params = $params;
-	    }
-
 
 	    /******************************************************************************/
 
@@ -92,8 +170,8 @@
 	    	
 	        try { 
 
-	            $this->stmt = $this->conn->prepare($this->sql);
-	            $this->stmt->execute($this->params);
+	            $this->stmt = $this->conn->prepare($this->_sql);
+	            $this->stmt->execute($this->_params);
 	            
 	            return $this->stmt->fetchAll($mode);
 
