@@ -5,11 +5,11 @@ class controller  {
 	protected $response;
 
 	protected function json($data) {
-		header('Content-Type: application/json; charset=utf-8');
 
 		try {
 
 			$this->responseValidation($data);
+			header('Content-Type: application/json; charset=utf-8');
 			return print(json_encode($data));
 
 		} catch (Exception $e) {

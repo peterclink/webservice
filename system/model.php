@@ -19,7 +19,7 @@
 	    protected $_params;
 
 	    public function __construct() {
-	    	$this->_params = [];
+	    	//$this->_params = [];
 	    }
 
 		public function open() {       
@@ -139,26 +139,58 @@
 
 	    public function get($column = false) {
 
-			echo $this->_where;
-	    	//$this->columns($column);
-	    	//$this->querySelect();
+	    	$this->columns($column);
+	    	$this->querySelect();
 
-	    	//echo $this->_where;
+	    	try { 
 
-	    	/*try { 
-
-            	print($this->_sql . '<br>');
 	            $this->stmt = $this->conn->prepare($this->_sql);
-            	print($this->stmt->queryString);
 	            $this->stmt->execute($this->_params);
-	            
 	            return $this->stmt->fetchAll(PDO::FETCH_OBJ);
 
 	        } catch( PDOException $e ) {
+	        	echo $this->stmt->queryString;
+	            throw new Exception($e->getMessage());
+	        }
+	    }
+
+	    public function insert(Array $dados) {
+
+        	$column = implode(", ", array_keys($dados));
+			$value = "'".implode("', '", array_values($dados))."'";
+
+	        try { 
+
+	            $stmt = $this->conn->prepare("INSERT INTO `{$this->table}` ({$column}) VALUES ({$value})"); 
+	            $stmt->execute(array_values($dados));
+
+
+            } catch( PDOException $e ) {
 
 	            throw new Exception($e->getMessage());
-	        }*/
+
+	        }  
 	    }
+
+	    public function update($dados) {
+	    	var_dump($_REQUEST);
+	    	exit;
+
+	    	/*$column = implode(", ", array_keys($dados));
+			$value = "'".implode("', '", array_values($dados))."'";
+
+			try { 
+
+	            $stmt = $this->conn->prepare("UPDATE `{$this->_table}` SET {$column} WHERE $where"); 
+	            $stmt->execute(array_values($dados));
+
+            } catch( PDOException $e ) {
+
+	            throw new Exception($e->getMessage());
+
+	        }*/
+
+		}
 
 	    /******************************************************************************/
 
@@ -201,42 +233,6 @@
 	            throw new Exception($e->getMessage());
 	        }       
 	    }
-
-	    public function insert( Array $dados ) {
-
-        	$column = implode(", ", array_keys($dados));
-			$value = "'".implode("', '", array_values($dados))."'";
-
-	        try { 
-
-	            $stmt = $this->conn->prepare("INSERT INTO `{$this->_table}` ({$column}) VALUES ({$value})"); 
-	            $stmt->execute(array_values($dados));
-
-
-            } catch( PDOException $e ) {
-
-	            throw new Exception($e->getMessage());
-
-	        }  
-	    }
-
-	    public function update( Array $dados ) {
-
-	    	$column = implode(", ", array_keys($dados));
-			$value = "'".implode("', '", array_values($dados))."'";
-
-			try { 
-
-	            $stmt = $this->conn->prepare("UPDATE `{$this->_table}` SET {$column} WHERE $where"); 
-	            $stmt->execute(array_values($dados));
-
-            } catch( PDOException $e ) {
-
-	            throw new Exception($e->getMessage());
-
-	        }
-
-		}
 
 	    public function set( $prop, $value ) {
 	      /*

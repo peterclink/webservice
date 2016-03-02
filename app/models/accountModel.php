@@ -3,20 +3,53 @@ class accountModel extends model {
 	
 	protected $table = "accounts";
 	protected $columns = [
+		'id',
 		'username',
 		'email',
 		'password',
 		'status'
 	];
 
+	public function _get($id) {
+		$this->open();
+		
+		if($id) {
+			$this->where(array('id' => $id));
+		} 
+		
+		$data = $this->get();
+
+		$this->close();
+
+		return $data;
+	}
+
+	public function _post($data) {
+		$this->open();
+		
+		$data = $this->insert($data);
+
+		$this->close();
+	}
+
+	public function _put() {
+		$this->open();
+		
+		$data = $this->update($data);
+
+		$this->close();
+	}
+
+	public function _delete() {
+
+	}
+
 	public function sets($data) {
 		$this->open();
 
-		$this->where(array('id' => 1,'user' => 'peter','email' => 'peter.link'));
+		$this->where(array('id' => 3, 'status' => 1));
 		
-		$this->OrWhere(array('id' => 1,'user' => 'peter','email' => 'peter.link'));
-		
-		$this->get();
+		var_dump($this->get());
 		
 		$this->close();
 	}
