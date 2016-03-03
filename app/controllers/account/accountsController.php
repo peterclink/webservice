@@ -2,8 +2,7 @@
 class accountsController extends controller {
 
 	public function index_get($id = false) {
-		$model = new accountModel();
-		$data = $model->_get($id);
+		$data = $this->model->_get($id);
 		$this->json($data);
 	}
 
@@ -13,23 +12,17 @@ class accountsController extends controller {
 		$data['password'] = $this->request->post('password');
 		$data['email'] = $this->request->post('email');
 
-		$this->model = new accountModel();
-
 		$this->model->_post($data);
 
-		$this->json(['Success']);
+		//$this->json(['Success']);
 	}
 
 	public function index_put() {
-		
-		$data['username'] = $this->request->post('username');
-		$data['password'] = $this->request->post('password');
-		$data['email'] = $this->request->post('email');
 
-		$this->model = new accountModel();
+		$username = $this->request->put('username');
+		$data['password'] = $this->request->put('password');
+		$data['email'] = $this->request->put('email');
 
-		$this->model->_put($data);
-
-		//$this->json(['Success']);
+		$this->model->_put($data, $username);
 	}
 }

@@ -17,6 +17,7 @@
 	    protected $_orWhere;
 	    protected $_sql;
 	    protected $_params;
+	    protected $_update;
 
 	    public function __construct() {
 	    	//$this->_params = [];
@@ -44,6 +45,7 @@
 	    	$this->_where = null;
 	    	$this->_columns = null;
 	    	$this->_params = null;
+	    	$this->_update = null;
 	    }
 
 	    private function querySelect() {
@@ -172,23 +174,41 @@
 	        }  
 	    }
 
+	    private function queryUpdate() {
+	    	$this->_sql = 'UPDATE ' . $this->table . ' SET ' . $this->_update . $this->_where;
+	    }
+
+	    public function updateSet($dados) {
+
+	    	$fields = count($dados);
+			$i = 0;
+
+	    	foreach ($dados as $key => $value) {
+				$newKey = ':'.$key;
+				$this->_params[$newKey] = $value;
+				if ( $i+1 == $fields) {
+					$this->_update .= $key . ' = ' . $newKey;
+				} else {
+					$this->_update .= $key . ' = ' . $newKey . ', ';
+				}
+				$i++;
+			}
+	    }
+
 	    public function update($dados) {
-	    	var_dump($_REQUEST);
-	    	exit;
+	    	
+	    	$this->updateSet($dados);
+	    	$this->queryUpdate();
 
-	    	/*$column = implode(", ", array_keys($dados));
-			$value = "'".implode("', '", array_values($dados))."'";
+	    	try { 
 
-			try { 
+	            $this->stmt = $this->conn->prepare($this->_sql);
+	            $this->stmt->execute($this->_params);
 
-	            $stmt = $this->conn->prepare("UPDATE `{$this->_table}` SET {$column} WHERE $where"); 
-	            $stmt->execute(array_values($dados));
-
-            } catch( PDOException $e ) {
-
-	            throw new Exception($e->getMessage());
-
-	        }*/
+	        } catch( PDOException $e ) {
+	        	echo $this->stmt->queryString;
+	            throw new Exception($e);
+	        }
 
 		}
 

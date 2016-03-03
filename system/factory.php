@@ -27,6 +27,9 @@ class factory {
 		} else {
 			$app = $this->_instance;
 			$action = $this->_action;
+			
+			$app->model = $this->setModel();
+			$app->model->validate = new DataValidatorHelper();
 
 			$app->normalize = $this->normalize;
 			$app->request = $this->request;
@@ -120,6 +123,16 @@ class factory {
 
 	private function setArgument( $argument = 'index' ) {
 		$this->_argument = $this->normalize->_strtolower($argument);
+	}
+
+	private function setModel() {
+		$model = $this->_controller;
+
+		if(substr($model, -1) == 's') {
+			$model = substr($model,0,-1) . 'Model';
+		}
+
+		return new $model();
 	}
 
 	private function setController( $controller = 'index' ) {

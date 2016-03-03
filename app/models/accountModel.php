@@ -26,16 +26,29 @@ class accountModel extends model {
 
 	public function _post($data) {
 		$this->open();
+
+		$this->validate->set('username',$data['username'])->is_required()->min_length(5)->max_length(20);
+		$this->validate->set('password',$data['password'])->is_required()->min_length(5)->max_length(20);
+		$this->validate->set('email',$data['email'])->is_email();
+
+		$this->validate->validate();
 		
-		$data = $this->insert($data);
+		$this->insert($data);
 
 		$this->close();
 	}
 
-	public function _put() {
+	public function _put($data, $id) {
 		$this->open();
+
+		//$this->validate->set('username',$data['username'])->is_required()->min_length(5)->max_length(20);
+		$this->validate->set('password',$data['password'])->is_required()->min_length(5)->max_length(20);
+		$this->validate->set('email',$data['email'])->is_email();
+
+		$this->validate->validate();
 		
-		$data = $this->update($data);
+		$this->where(array('username' => $id));
+		$this->update($data);
 
 		$this->close();
 	}
